@@ -1,35 +1,44 @@
-import React, { useEffect, useState } from 'react'
-import './ListProduct.css'
-import cross_icon from '../../assets/cross_icon.png'
+import React, { useEffect, useState } from 'react';
+import './ListProduct.css';
+import cross_icon from '../../assets/cross_icon.png';
 
 const ListProduct = () => {
+  const BASE_URL = process.env.REACT_APP_API_BASE;
 
-    const [allproducts,setAllProducts] = useState([]);
+  const [allproducts, setAllProducts] = useState([]);
 
-    const fetchInfo = async () =>{
-      await fetch('http://localhost:4000/allproducts')
-      .then((res)=>res.json())
-      .then((data)=>{setAllProducts(data)});
+  const fetchInfo = async () => {
+    try {
+      const res = await fetch(`${BASE_URL}/allproducts`);
+      const data = await res.json();
+      setAllProducts(data);
+    } catch (error) {
+      console.error('Error fetching products:', error);
     }
+  };
 
-    useEffect(()=>{
-      fetchInfo();
-    },[])
+  useEffect(() => {
+    fetchInfo();
+  }, []);
 
-    const remove_product = async (id)=>{
-      await fetch('http://localhost:4000/removeproduct',{
+  const remove_product = async (id) => {
+    try {
+      await fetch(`${BASE_URL}/removeproduct`, {
         method: 'POST',
-        headers:{
-          Accept:'application/json',
-          'Content-Type':'application/json',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
         },
-        body:JSON.stringify({id:id})
-      })
+        body: JSON.stringify({ id }),
+      });
       await fetchInfo();
+    } catch (error) {
+      console.error('Error removing product:', error);
     }
+  };
 
   return (
-    <div className='list-product'>
+    <div className="list-product">
       <h1>All Products List</h1>
       <div className="listproduct-format-main">
         <p>Products</p>
@@ -39,24 +48,33 @@ const ListProduct = () => {
         <p>Category</p>
         <p>Remove</p>
       </div>
-        <div className="listproduct-allproducts">
-          <hr />
-          {allproducts.map((product,index)=>{
-            return <>
-              <div key={index} className="listproduct-format-main listproduct-format">
-              <img src={product.image} alt="" className='listproduct-product-icon'/>
+      <div className="listproduct-allproducts">
+        <hr />
+        {allproducts.map((product, index) => (
+          <React.Fragment key={index}>
+            <div className="listproduct-format-main listproduct-format">
+              <img
+                src={product.image}
+                alt={product.name}
+                className="listproduct-product-icon"
+              />
               <p>{product.name}</p>
               <p>${product.old_price}</p>
               <p>${product.new_price}</p>
               <p>{product.category}</p>
-              <img onClick={()=>{remove_product(product.id)}} className='listproduct-remove-icon' src={cross_icon} alt=""/>
+              <img
+                onClick={() => remove_product(product.id)}
+                className="listproduct-remove-icon"
+                src={cross_icon}
+                alt="Remove"
+              />
             </div>
             <hr />
-            </>
-          })}
-        </div>
+          </React.Fragment>
+        ))}
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default ListProduct
+export default ListProduct;
